@@ -24,7 +24,24 @@ flowdata_clean <- flowdata_raw[, !sapply(flowdata_raw, anyNA)]    # Remove NA co
 
 flowdata_ub <- flowdata_clean[, 1:21]   # Restrict to just upper basin gages
 
-flowdata_ub$Date < ymd(flowdata_ub$Date)    # Converts date column to date type object
+flowdata_ub$Date <- ymd(flowdata_ub$Date)    # Converts date column to date type object
 
-flowdata_ub_AMJ <- flowdata_ub %>% filter(month(Date) %in% 4:6)
+flowdata_ub_AMJ <- flowdata_ub %>% filter(month(Date) %in% 4:6)   # Filter to just spring flow (A-J)
+
+# Convert flow data to numeric and remove commas from entries
+flowdata_ub_AMJ[, 2:ncol(flowdata_ub_AMJ)] <- lapply(
+  flowdata_ub_AMJ[, 2:ncol(flowdata_ub_AMJ)], 
+  function(col) as.numeric(gsub(",", "", col)))
+
+
+# Loop structure to sum the annual spring flow for each year and Upper Basin gage location
+ann_spring_flow <- matrix(nrow = length(1906:2020), ncol = ncol(flowdata_ub_AMJ)-1) 
+yrs <- as.numeric(1906:2020)
+
+for(i in 1:length(yrs)){
+  for(j in 2:ncol(flowdata_ub_AMJ)){
+    ann_spring_flow[i, j - 1] = sum(flowdata_ub_AMJ[[j]][year(flowdata_ub_AMJ$Date) == yrs[i]], na.rm = TRUE)
+  }
+}
+
 ```
