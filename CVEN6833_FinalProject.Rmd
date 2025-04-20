@@ -6,6 +6,9 @@ This R Markdown file runs the main body of code for this final project analysis.
 
 #####*Get Libraries*
 ```{r Get Libraries}
+library(dplyr)
+library(lubridate)
+
 ```
 
 #####*Source Functions*
@@ -19,4 +22,9 @@ flowdata_raw <- flowdata_raw[1:(nrow(flowdata_raw)-5),]   # Remove summary rows
 
 flowdata_clean <- flowdata_raw[, !sapply(flowdata_raw, anyNA)]    # Remove NA columns
 
+flowdata_ub <- flowdata_clean[, 1:21]   # Restrict to just upper basin gages
+
+flowdata_ub$Date < ymd(flowdata_ub$Date)    # Converts date column to date type object
+
+flowdata_ub_AMJ <- flowdata_ub %>% filter(month(Date) %in% 4:6)
 ```
