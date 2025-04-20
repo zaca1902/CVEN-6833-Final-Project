@@ -12,3 +12,11 @@ This R Markdown file runs the main body of code for this final project analysis.
 ```{r Source Functions}
 ```
 
+#####*Read and Format Flow Data*
+```{r Read Flow Data}
+flowdata_raw <- as.data.frame(read.csv("NatFlowDataCRB_1906_to_2020.csv", header = TRUE, skip = 3))
+flowdata_raw <- flowdata_raw[1:(nrow(flowdata_raw)-5),]   # Remove summary rows
+
+flowdata_clean <- flowdata_raw[, !sapply(flowdata_raw, anyNA)]    # Remove NA columns
+
+```
