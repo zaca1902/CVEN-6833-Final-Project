@@ -1,0 +1,60 @@
+1906 - 2020 Monthly Flows
+https://www.usbr.gov/lc/region/g4000/NaturalFlow/current.html
+
+
+-Compute Spring flows at each gauge 
+- Restrict to Upper Basin
+(Apr-Jun) total flows
+-divide by 10^6 to get them in MAF (Million Acre-Feet)
+
+(Apr-Jun) 1906 to (Apr-Jun) 2020
+
+
+-Run the commands in Cmds-4Zach.R
+It will provide winter (Dec-Feb) average SSTs
+for the period
+
+(Dec-Feb) 1906 to (Dec-Feb) 2020
+(Dec 1905 - Feb 1906 average...)
+
+----------
+
+- Perform SOM on the winter SSTs
+- For each each SOM node select the streamflows at the upper basin gauges
+You can even select handful - Lees Ferry, San Juan, Gunnison, Green,
+Yampa and Glenwood (six locagions)
+
+- Display the flows at each gauge as boxplots 
+For each node you will have six boxpolots  in one figure
+
+---
+Looking at the flow boxplots and the SST patterns of the nodes you can 
+infer the patterns that produce high/low flows.
+--
+
+Perform PCA on the SSTs.
+-Use the first ~4 PCS and predict flows at Lees Ferry
+
+and/or
+
+USe the 4 PCs to predict at the 6 locations simultaneously
+using CCA. If you do this,  you don't have to do a PC on the flows,
+as they are only 6 of them. 4 PCS to predict 6 flows should be fine
+in CCA
+
+Use any other forecasting method - CART/Random Forest
+--
+
+
+
+
+
+
+
+
+
+
+
+
+
+
