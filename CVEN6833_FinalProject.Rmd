@@ -209,8 +209,15 @@ for(k in start:end){
 
 ```
 
+##### *Select Gages and Boxplot the Flows for Each SOM Node*
+The selected gages are the Upper Colorado Reach Inflow (Colorado River @ Glenwood Springs, CO), Gunnison River @ Grand Junction, CO, Green River Below Fontenelle Reservoir, WY, Little Snake River near Lily, CO, San Juan River near Bluff, UT, and Colorado River @ Lees Ferry, AZ.    
+```{r}
+# Subset the annual spring flow dataset for just the selected gages
+selectgage <- c(1, 6, 9, 13, 19, 20)
 
+ann_spring_flow_sel <- ann_spring_flow[, selectgage]
+colnames(ann_spring_flow_sel) <- c("CR_Glen", "Gunn_Grand", "Green_FontRes", "LSR_Lily", "SJR_Bluff", "CR_LeesFerry")
 
-
+```
 
 
