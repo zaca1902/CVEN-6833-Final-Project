@@ -15,6 +15,9 @@ library(kohonen)
 library(ggplot2)
 library(tidyverse)
 library(tibble)
+library(rpart)
+library(rpart.plot)
+
 
 ```
 
@@ -243,9 +246,21 @@ ggplot(ann_spring_flow_sel_plot, aes(x = Location, y = SpringFlow))+
 
 #####*PCA on SSTs*
 ```{r PCA on SSTs}
+# Perform the PCA
+sst_pcaresult <- prcomp(sstannavg, scale. = TRUE)
 
+# Extract the first 4 PCs
+sstpcs <- sst_pcaresult$x[,1:4]
 
 ```
+
+#####*Fit and Plot a CART Model for Streamflow with the PCs*
+```{r Fit a CART Model}
+# Fit and Plot a CART Model for each gage based on the PCs
+
+```
+
+
 
 
 
