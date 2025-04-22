@@ -274,8 +274,21 @@ LF_cart <- CARTMod4Flow(ann_spring_flow_sel$CR_LeesFerry, sstpcs, "Colorado Rive
 
 ```
 
+#####*Predict Streamflow at each gage using the CART Models*
+```{r Predict with CART}
+# Predict streamflow at each gage with fit CART models
+predvals_Glen <- predict(Glen_cart$mod, newdata = sstpcs)
 
+predvals_Gunn <- predict(Gunn_cart$mod, newdata = sstpcs)
 
+predvals_Green <- predict(Green_cart$mod, newdata = sstpcs)
 
+predvals_LSR <- predict(LSR_cart$mod, newdata = sstpcs)
+
+predvals_SJR <- predict(SJR_cart$mod, newdata = sstpcs)
+
+predvals_LF <- predict(LF_cart$mod, newdata = sstpcs)
+
+```
 
 
