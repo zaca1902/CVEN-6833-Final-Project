@@ -12,7 +12,9 @@ library(maps)
 library(akima)
 library(fields)
 library(kohonen)
-
+library(ggplot2)
+library(tidyverse)
+library(tibble)
 
 ```
 
@@ -217,6 +219,25 @@ selectgage <- c(1, 6, 9, 13, 19, 20)
 
 ann_spring_flow_sel <- ann_spring_flow[, selectgage]
 colnames(ann_spring_flow_sel) <- c("CR_Glen", "Gunn_Grand", "Green_FontRes", "LSR_Lily", "SJR_Bluff", "CR_LeesFerry")
+
+# Convert data for boxplotting with ggplot2
+ann_spring_flow_sel <- ann_spring_flow_sel %>%
+  rownames_to_column(var = "Year")
+
+ann_spring_flow_sel_plot <- ann_spring_flow_sel %>%
+  pivot_longer(cols = -Year, names_to = "Location", values_to = "SpringFlow")
+
+ann_spring_flow_sel_plot$Location <- factor(
+  ann_spring_flow_sel_plot$Location,
+  levels = colnames(ann_spring_flow_sel)[-1])
+
+# Boxplot the annual spring flow gage data
+ggplot(ann_spring_flow_sel_plot, aes(x = Location, y = SpringFlow))+
+  geom_boxplot(fill = "lightblue")+
+  labs(title = "Annual Spring Flow for Select Colorado River Basin Gages (1906-2020)", x = "Location", y = "Spring Flow (MAF)")+
+  theme_minimal()+
+  theme(panel.border = element_rect(color = "black", fill = NA, size = 1))
+  
 
 ```
 
