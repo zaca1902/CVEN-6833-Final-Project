@@ -11,6 +11,8 @@ library(lubridate)
 library(maps)
 library(akima)
 library(fields)
+library(kohonen)
+
 
 ```
 
@@ -124,6 +126,90 @@ rm("data")	#remove the object data to clear up space
 write(t(xygrid1),file="kaplan-sst-locs-4Zach.txt",ncol=2)
 
 ```
+
+#####*SOM on Winter SST*
+```{r SOM on Winter SST}
+# Establish the SOM Parameters
+n = 4
+
+nnodes = n^2
+
+# Perform the SOM Computations
+library(kohonen)
+begin <- Sys.time()
+SOM <- som(sstannavg, grid = somgrid(n,n, "rectangular"))
+end <- Sys.time()
+end-begin
+
+# Plot the number of observations in each node
+colors <- function(n, alpha = 1){
+  rev(heat.colors(n, alpha))}
+
+plot(SOM, type = "counts",
+     palette.name = colors,
+     heatkey = TRUE, main = "Number of Observations per Node")
+
+# Write the composite data nodes
+nodes = as.data.frame(array(NaN, dim = c(dim(sstannavg)[2],nnodes)))
+for(i in 1:nnodes){
+  index = which(SOM$unit.classif == i)
+  sst_df = sstannavg[index,]
+  if(length(index)>1){
+    nodes[,i] = colMeans(sst_df, na.rm=T)}
+  else{
+    nodes[,i] = sst_df}}
+
+noderange = range(nodes)
+
+# Plot the SST SOM Nodes
+lon = sort(unique(xygrid[,2]))
+lat = sort(unique(xygrid[,1]))
+
+sstrange = range(nodes)
+
+nx = 50
+
+par(oma = c(0,0,2.5,1))
+par(mfrow = c(n, n))
+par(mar = c(2, 3, 2, 1))
+
+detach(package:kohonen)
+
+for(i in 1:nnodes){
+  zfull = rep(NaN,nglobe)
+  zfull[indexgrid] = nodes[,i]
+  zmat = matrix(zfull, nrow = nrows, ncol = ncols)
+  image.plot(lon, lat, zmat, ylim = range(-16,16), xlim = sstrange, main = paste("Node", i, sep = ""))
+  contour(lon, lat, (zmat), ylim = range(-16,16), add = TRUE, nlev = 6, lwd = 1)
+  map("world2",add=T)}
+
+mtext("Annual Average winter SST - SOM Maps 4x4", outer = TRUE, side = 3, cex = 1.2, line = 1)
+
+# # Plot the composite node data on a map
+# nx = 50
+# 
+# par(oma = c(0,2,3,6))
+# par(mfrow = c(n, n))
+# par(mar = c(3, 3, 2, 1))
+# 
+# detach(package:kohonen)
+# 
+# for(i in 1:nnodes){
+#   quilt.plot(xygrid1[,2], xygrid1[,1], nodes[,i], main = paste("Node ", i, sep = ""), zlim = noderange, add.legend = FALSE, 
+#              nx = nx, ny = nx)
+#   map("world2", add = T)}
+# 
+# mtext("Winter Annual Average SST - SOM Maps 4x4", outer = TRUE, side = 3, cex = 1.2, line = 1)
+# par(oma = c(1,0,0,1))
+# par(mar = c(0, 0, 0, 0))
+# image.plot(zlim = noderange, legend.only = TRUE, legend.shrink = 1, legend.width = 3)
+# 
+# library(kohonen)
+
+```
+
+
+
 
 
 
