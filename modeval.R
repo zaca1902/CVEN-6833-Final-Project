@@ -22,5 +22,5 @@ rmseplot <- ggplot()+
   theme(plot.title = element_text(size = 13, face = "bold", hjust = 0.5))+
   coord_cartesian(ylim = c(0,5000))
 
-return(list(corrplot, rmseplot))
+return(list(corrplot = corrplot, rmseplot = rmseplot))
 }

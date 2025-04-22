@@ -25,6 +25,7 @@ library(rpart.plot)
 Each of these function codes can be found at the end of this document as "commented out" lines of code. The source commands here pull from the same directory/repository as this Rmd file.
 ```{r Source Functions}
 source("CARTMod4FLow.R")
+source("modeval.R")
 
 ```
 
@@ -292,9 +293,13 @@ predvals_LF <- predict(LF_cart$mod, newdata = sstpcs)
 
 ```
 
-#####*Evluate the Fit of Each Model with RMSE and Correlation*
+#####*Evaluate the Fit of Each Model*
 ```{r Model Evaluation}
+# Evaluate each model fit using Correlation and RMSE, then boxplot the results
+Glen_eval <- modeval(ann_spring_flow_sel$CR_Glen, predvals_Glen)
 
+print(Glen_eval$corrplot)
+print(Glen_eval$rmseplot)
 
 ```
 
