@@ -23,6 +23,8 @@ library(rpart.plot)
 
 #####*Source Functions*
 ```{r Source Functions}
+source("CARTMod4FLow.R")
+
 ```
 
 #####*Read and Format Flow Data*
@@ -250,13 +252,21 @@ ggplot(ann_spring_flow_sel_plot, aes(x = Location, y = SpringFlow))+
 sst_pcaresult <- prcomp(sstannavg, scale. = TRUE)
 
 # Extract the first 4 PCs
-sstpcs <- sst_pcaresult$x[,1:4]
+sstpcs <- as.data.frame(sst_pcaresult$x[,1:4])
 
 ```
 
 #####*Fit and Plot a CART Model for Streamflow with the PCs*
 ```{r Fit a CART Model}
 # Fit and Plot a CART Model for each gage based on the PCs
+Glen_cart <- CARTMod4Flow(ann_spring_flow_sel$CR_Glen, sstpcs, "Colorado River @ Glenwood Springs")
+Gunn_cart <- CARTMod4Flow(ann_spring_flow_sel$Gunn_Grand, sstpcs, "Gunnisor River @ Grand Junction")
+Green_cart <- CARTMod4Flow(ann_spring_flow_sel$Green_FontRes, sstpcs, "Green River @ Fontenelle Reservoir")
+LSR_cart <- CARTMod4Flow(ann_spring_flow_sel$LSR_Lily, sstpcs, "Little Snake River @ Lily")
+SJR_cart <- CARTMod4Flow(ann_spring_flow_sel$SJR_Bluff, sstpcs, "San Juan River @ Bluff")
+LF_cart <- CARTMod4Flow(ann_spring_flow_sel$CR_LeesFerry, sstpcs, "Colorado River @ Lees Ferry")
+
+
 
 ```
 
