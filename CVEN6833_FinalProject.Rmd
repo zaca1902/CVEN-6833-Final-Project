@@ -161,7 +161,7 @@ for(i in 1:nnodes){
 
 noderange = range(nodes)
 
-# Plot the SST SOM Nodes
+# Plot the SST SOM Nodes - both in a 4x4 grid and in 4, 2x2 grid plots
 lon = sort(unique(xygrid[,2]))
 lat = sort(unique(xygrid[,1]))
 
@@ -179,32 +179,35 @@ for(i in 1:nnodes){
   zfull = rep(NaN,nglobe)
   zfull[indexgrid] = nodes[,i]
   zmat = matrix(zfull, nrow = nrows, ncol = ncols)
-  image.plot(lon, lat, zmat, ylim = range(-16,16), xlim = sstrange, main = paste("Node", i, sep = ""))
-  contour(lon, lat, (zmat), ylim = range(-16,16), add = TRUE, nlev = 6, lwd = 1)
+  image.plot(lon, lat, zmat, ylim = range(-60, 90), main = paste("Node ", i, sep = ""))
+  contour(lon, lat, (zmat), ylim = range(-60, 90), add = TRUE, nlev = 6, lwd = 1)
   map("world2",add=T)}
 
-mtext("Annual Average winter SST - SOM Maps 4x4", outer = TRUE, side = 3, cex = 1.2, line = 1)
+mtext("Annual Average Winter SST - SOM Maps 4x4", outer = TRUE, side = 3, cex = 1.2, line = 1)
 
-# # Plot the composite node data on a map
-# nx = 50
-# 
-# par(oma = c(0,2,3,6))
-# par(mfrow = c(n, n))
-# par(mar = c(3, 3, 2, 1))
-# 
-# detach(package:kohonen)
-# 
-# for(i in 1:nnodes){
-#   quilt.plot(xygrid1[,2], xygrid1[,1], nodes[,i], main = paste("Node ", i, sep = ""), zlim = noderange, add.legend = FALSE, 
-#              nx = nx, ny = nx)
-#   map("world2", add = T)}
-# 
-# mtext("Winter Annual Average SST - SOM Maps 4x4", outer = TRUE, side = 3, cex = 1.2, line = 1)
-# par(oma = c(1,0,0,1))
-# par(mar = c(0, 0, 0, 0))
-# image.plot(zlim = noderange, legend.only = TRUE, legend.shrink = 1, legend.width = 3)
-# 
-# library(kohonen)
+subplots <- 4
+totalplots <- nnodes
+numplots <- ceiling(totalplots/subplots)
+
+for(ploti in 1:numplots){
+par(oma = c(0,0,2.5,1))
+par(mfrow = c((subplots/2), (subplots/2)))
+par(mar = c(2, 3, 2, 1))
+
+start <- (ploti-1)*subplots+1
+end <- min(ploti*subplots, totalplots)
+
+for(k in start:end){
+  zfull = rep(NaN,nglobe)
+  zfull[indexgrid] = nodes[,k]
+  zmat = matrix(zfull, nrow = nrows, ncol = ncols)
+  image.plot(lon, lat, zmat, ylim = range(-60, 90), main = paste("Node ", k, sep = ""))
+  contour(lon, lat, (zmat), ylim = range(-60, 90), add = TRUE, nlev = 6, lwd = 1)
+  map("world2",add=T)}
+
+  mtext(paste("Annual Average Winter SST - SOM Maps 4x4 (", ploti, " of ", numplots, ")", sep = ""),
+        outer = TRUE, side = 3, cex = 1.2, line = 1)}
+
 
 ```
 
