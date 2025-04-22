@@ -22,6 +22,7 @@ library(rpart.plot)
 ```
 
 #####*Source Functions*
+Each of these function codes can be found at the end of this document as "commented out" lines of code. The source commands here pull from the same directory/repository as this Rmd file.
 ```{r Source Functions}
 source("CARTMod4FLow.R")
 
@@ -290,5 +291,39 @@ predvals_SJR <- predict(SJR_cart$mod, newdata = sstpcs)
 predvals_LF <- predict(LF_cart$mod, newdata = sstpcs)
 
 ```
+
+#####*Evluate the Fit of Each Model with RMSE and Correlation*
+```{r Model Evaluation}
+
+
+```
+
+#####*Commented Out Functions*
+```{r Functions}
+### CARTMod4FLow.R
+# CARTMod4Flow <- function(flowdata_gage, sst_pcs, gagename)
+# {
+#   cart <- rpart(flowdata_gage ~., data = sst_pcs, method = "anova")
+#   
+#   rpart.plot(cart, type = 3, extra = 101, under = TRUE, 
+#                          tweak = 1.2, 
+#                          main = paste("CART on Annual Spring Streamflow for", 
+#                                       gagename, 
+#                                       "\nUsing Winter SST PCs (4) as Covariates"))
+#   cartplot <- recordPlot()
+#   
+#   return(list(
+#     mod = cart,
+#     plot = cartplot))
+# }
+
+
+### modeval.R
+
+```
+
+
+
+
 
 
