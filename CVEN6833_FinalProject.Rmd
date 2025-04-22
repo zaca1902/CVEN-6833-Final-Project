@@ -56,7 +56,6 @@ ann_spring_flow <- as.data.frame(ann_spring_flow)
 
 ```
 
-
 #####*Cmds-4Zach.R*
 This code chunk was directly provided/written by Professor R. Balaji.
 ```{r Cmds-4Zach.R}
@@ -207,7 +206,6 @@ for(k in start:end){
 
   mtext(paste("Annual Average Winter SST - SOM Maps 4x4 (", ploti, " of ", numplots, ")", sep = ""),
         outer = TRUE, side = 3, cex = 1.2, line = 1)}
-
 
 ```
 
