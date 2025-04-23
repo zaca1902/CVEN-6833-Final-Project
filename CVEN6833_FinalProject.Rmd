@@ -15,8 +15,7 @@ library(kohonen)
 library(ggplot2)
 library(tidyverse)
 library(tibble)
-library(rpart)
-library(rpart.plot)
+library(randomForest)
 
 
 ```
@@ -24,7 +23,7 @@ library(rpart.plot)
 #####*Source Functions*
 Each of these function codes can be found at the end of this document as "commented out" lines of code. The source commands here pull from the same directory/repository as this Rmd file.
 ```{r Source Functions}
-source("CARTMod4FLow.R")
+source("RFMod4FLow.R")
 source("modeval.R")
 
 ```
@@ -243,34 +242,20 @@ for (nodenum in 1:nnodes){
   }
 
 # Boxplot the associated annual gage flows for each SOM node
+par(mfrow = c(3,3))
 for (nodenum in 1:nnodes){
   boxplot(as.matrix(nodeflows[[nodenum]][, 1:ngages]), ylim = c(-0.5,2), col = "lightblue", 
           ylab = "Spring Flow (MAF)", main = paste("Node", nodenum))
   grid(nx = NA, ny = NULL)
 }
+mtext("Spring Flow for Each Gage at the 3x3 SOM Nodes", outer = TRUE, side = 3, cex = 1.2, line = 1)
 
-# node1_flows <- ann_spring_flow_sel[node_idx[[1]],]
-# node2_flows <- ann_spring_flow_sel[node_idx[[2]],]
-# node3_flows <- ann_spring_flow_sel[node_idx[[3]],]
-
-# # Convert data for boxplotting with ggplot2
-# ann_spring_flow_sel <- ann_spring_flow_sel %>%
-#   rownames_to_column(var = "Year")
-# 
-# ann_spring_flow_sel_plot <- ann_spring_flow_sel %>%
-#   pivot_longer(cols = -Year, names_to = "Location", values_to = "SpringFlow")
-# 
-# ann_spring_flow_sel_plot$Location <- factor(
-#   ann_spring_flow_sel_plot$Location,
-#   levels = colnames(ann_spring_flow_sel)[-1])
-
-# # Boxplot the annual spring flow gage data
-# ggplot(ann_spring_flow_sel_plot, aes(x = Location, y = SpringFlow))+
-#   geom_boxplot(fill = "lightblue")+
-#   labs(title = "Annual Spring Flow for Select Colorado River Basin Gages (1906-2020)", x = "Location", y = "Spring Flow (MAF)")+
-#   theme_minimal()+
-#   theme(panel.border = element_rect(color = "black", fill = NA, size = 1))
-  
+par(mfrow = c(1,1))
+for (nodenum in 1:nnodes){
+  boxplot(as.matrix(nodeflows[[nodenum]][, 1:ngages]), ylim = c(-0.5,2), col = "lightblue", 
+          ylab = "Spring Flow (MAF)", main = paste("Node", nodenum))
+  grid(nx = NA, ny = NULL)
+}
 
 ```
 
@@ -284,21 +269,28 @@ sstpcs <- as.data.frame(sst_pcaresult$x[,1:4])
 
 ```
 
-#####*Fit and Plot a CART Model for Streamflow with the PCs*
-```{r Fit a CART Model}
+#####*PCA on Spring Flows*
+```{r PCA on Flows}
+# Perform the PCA
+flow_pcaresult <- prcomp(ann_spring_flow_sel, scale. = TRUE)
+
+# # Calculate proportion of variance explained and plot it
+# pve <- (flow_pcaresult$sdev)^2 / sum(flow_pcaresult$sdev^2)
+# 
+# plot(pve, type = "b", xlab = "Principal Component", 
+#      ylab = "Proportion of Variance Explained",
+#      main = "Scree Plot (PVE)",
+#      pch = 19)
+
+# Extract the first 4 PCs
+flowpcs <- as.data.frame(flow_pcaresult$x[,1:4])
+
+```
+
+#####*Fit a RF Model and predict for Streamflow*
+```{r RF Model}
 # Fit and plot a CART Model for each gage based on the PCs
-Glen_cart <- CARTMod4Flow(ann_spring_flow_sel$CR_Glen, sstpcs, "Colorado River @ Glenwood Springs")
-
-Gunn_cart <- CARTMod4Flow(ann_spring_flow_sel$Gunn_Grand, sstpcs, "Gunnisor River @ Grand Junction")
-
-Green_cart <- CARTMod4Flow(ann_spring_flow_sel$Green_FontRes, sstpcs, "Green River @ Fontenelle Reservoir")
-
-LSR_cart <- CARTMod4Flow(ann_spring_flow_sel$LSR_Lily, sstpcs, "Little Snake River @ Lily")
-
-SJR_cart <- CARTMod4Flow(ann_spring_flow_sel$SJR_Bluff, sstpcs, "San Juan River @ Bluff")
-
-LF_cart <- CARTMod4Flow(ann_spring_flow_sel$CR_LeesFerry, sstpcs, "Colorado River @ Lees Ferry")
-
+Glen_RF <- RFMod4Flow(flowpcs, sstpcs)
 
 ```
 
@@ -331,22 +323,8 @@ print(Glen_eval$rmseplot)
 
 #####*Commented Out Functions*
 ```{r Functions}
-### CARTMod4FLow.R
-# CARTMod4Flow <- function(flowdata_gage, sst_pcs, gagename)
-# {
-#   cart <- rpart(flowdata_gage ~., data = sst_pcs, method = "anova")
-#   
-#   rpart.plot(cart, type = 3, extra = 101, under = TRUE, 
-#                          tweak = 1.2, 
-#                          main = paste("CART on Annual Spring Streamflow for", 
-#                                       gagename, 
-#                                       "\nUsing Winter SST PCs (4) as Covariates"))
-#   cartplot <- recordPlot()
-#   
-#   return(list(
-#     mod = cart,
-#     plot = cartplot))
-# }
+### RFMod4FLow.R
+
 
 
 ### modeval.R
