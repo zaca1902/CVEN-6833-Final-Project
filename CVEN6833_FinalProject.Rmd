@@ -138,7 +138,7 @@ write(t(xygrid1),file="kaplan-sst-locs-4Zach.txt",ncol=2)
 #####*SOM on Winter SST*
 ```{r SOM on Winter SST}
 # Establish the SOM Parameters
-n = 4
+n = 3
 
 nnodes = n^2
 
@@ -169,7 +169,7 @@ for(i in 1:nnodes){
 
 noderange = range(nodes)
 
-# Plot the SST SOM Nodes - both in a 4x4 grid and in 4, 2x2 grid plots
+# Plot the SST SOM Nodes - both in a 3x3 grid
 lon = sort(unique(xygrid[,2]))
 lat = sort(unique(xygrid[,1]))
 
@@ -189,32 +189,37 @@ for(i in 1:nnodes){
   zmat = matrix(zfull, nrow = nrows, ncol = ncols)
   image.plot(lon, lat, zmat, ylim = range(-60, 90), main = paste("Node ", i, sep = ""))
   contour(lon, lat, (zmat), ylim = range(-60, 90), add = TRUE, nlev = 6, lwd = 1)
-  map("world2",add=T)}
+  maps::map("world2", add = T)}
 
-mtext("Annual Average Winter SST - SOM Maps 4x4", outer = TRUE, side = 3, cex = 1.2, line = 1)
+mtext("Annual Average Winter SST - SOM Maps 3x3", outer = TRUE, side = 3, cex = 1.2, line = 1)
 
-subplots <- 4
-totalplots <- nnodes
-numplots <- ceiling(totalplots/subplots)
+# Get the data indices for each node
+obs_nodes <- SOM$unit.classif
+node_idx <- split(1:nrow(sstannavg), obs_nodes)
 
-for(ploti in 1:numplots){
-par(oma = c(0,0,2.5,1))
-par(mfrow = c((subplots/2), (subplots/2)))
-par(mar = c(2, 3, 2, 1))
 
-start <- (ploti-1)*subplots+1
-end <- min(ploti*subplots, totalplots)
-
-for(k in start:end){
-  zfull = rep(NaN,nglobe)
-  zfull[indexgrid] = nodes[,k]
-  zmat = matrix(zfull, nrow = nrows, ncol = ncols)
-  image.plot(lon, lat, zmat, ylim = range(-60, 90), main = paste("Node ", k, sep = ""))
-  contour(lon, lat, (zmat), ylim = range(-60, 90), add = TRUE, nlev = 6, lwd = 1)
-  map("world2",add=T)}
-
-  mtext(paste("Annual Average Winter SST - SOM Maps 4x4 (", ploti, " of ", numplots, ")", sep = ""),
-        outer = TRUE, side = 3, cex = 1.2, line = 1)}
+# subplots <- 4
+# totalplots <- nnodes
+# numplots <- ceiling(totalplots/subplots)
+# 
+# for(ploti in 1:numplots){
+# par(oma = c(0,0,2.5,1))
+# par(mfrow = c((subplots/2), (subplots/2)))
+# par(mar = c(2, 3, 2, 1))
+# 
+# start <- (ploti-1)*subplots+1
+# end <- min(ploti*subplots, totalplots)
+# 
+# for(k in start:end){
+#   zfull = rep(NaN,nglobe)
+#   zfull[indexgrid] = nodes[,k]
+#   zmat = matrix(zfull, nrow = nrows, ncol = ncols)
+#   image.plot(lon, lat, zmat, ylim = range(-60, 90), main = paste("Node ", k, sep = ""))
+#   contour(lon, lat, (zmat), ylim = range(-60, 90), add = TRUE, nlev = 6, lwd = 1)
+#   maps::map("world2",add=T)}
+# 
+#   mtext(paste("Annual Average Winter SST - SOM Maps 4x4 (", ploti, " of ", numplots, ")", sep = ""),
+#         outer = TRUE, side = 3, cex = 1.2, line = 1)}
 
 ```
 
@@ -223,27 +228,48 @@ The selected gages are the Upper Colorado Reach Inflow (Colorado River @ Glenwoo
 ```{r}
 # Subset the annual spring flow dataset for just the selected gages
 selectgage <- c(1, 6, 9, 13, 19, 20)
+ngages <-length(selectgage)
 
 ann_spring_flow_sel <- ann_spring_flow[, selectgage]
 colnames(ann_spring_flow_sel) <- c("CR_Glen", "Gunn_Grand", "Green_FontRes", "LSR_Lily", "SJR_Bluff", "CR_LeesFerry")
 
-# Convert data for boxplotting with ggplot2
-ann_spring_flow_sel <- ann_spring_flow_sel %>%
-  rownames_to_column(var = "Year")
+# Parse the spring flow years at the selected gages into their respective SOM nodes
+nodeflows <- list()
+node_count <- 1
 
-ann_spring_flow_sel_plot <- ann_spring_flow_sel %>%
-  pivot_longer(cols = -Year, names_to = "Location", values_to = "SpringFlow")
+for (nodenum in 1:nnodes){
+  nodeflows[[nodenum]] <- ann_spring_flow_sel[node_idx[[nodenum]],]
+  node_count <- node_count + 1
+  }
 
-ann_spring_flow_sel_plot$Location <- factor(
-  ann_spring_flow_sel_plot$Location,
-  levels = colnames(ann_spring_flow_sel)[-1])
+# Boxplot the associated annual gage flows for each SOM node
+for (nodenum in 1:nnodes){
+  boxplot(as.matrix(nodeflows[[nodenum]][, 1:ngages]), ylim = c(-0.5,2), col = "lightblue", 
+          ylab = "Spring Flow (MAF)", main = paste("Node", nodenum))
+  grid(nx = NA, ny = NULL)
+}
 
-# Boxplot the annual spring flow gage data
-ggplot(ann_spring_flow_sel_plot, aes(x = Location, y = SpringFlow))+
-  geom_boxplot(fill = "lightblue")+
-  labs(title = "Annual Spring Flow for Select Colorado River Basin Gages (1906-2020)", x = "Location", y = "Spring Flow (MAF)")+
-  theme_minimal()+
-  theme(panel.border = element_rect(color = "black", fill = NA, size = 1))
+# node1_flows <- ann_spring_flow_sel[node_idx[[1]],]
+# node2_flows <- ann_spring_flow_sel[node_idx[[2]],]
+# node3_flows <- ann_spring_flow_sel[node_idx[[3]],]
+
+# # Convert data for boxplotting with ggplot2
+# ann_spring_flow_sel <- ann_spring_flow_sel %>%
+#   rownames_to_column(var = "Year")
+# 
+# ann_spring_flow_sel_plot <- ann_spring_flow_sel %>%
+#   pivot_longer(cols = -Year, names_to = "Location", values_to = "SpringFlow")
+# 
+# ann_spring_flow_sel_plot$Location <- factor(
+#   ann_spring_flow_sel_plot$Location,
+#   levels = colnames(ann_spring_flow_sel)[-1])
+
+# # Boxplot the annual spring flow gage data
+# ggplot(ann_spring_flow_sel_plot, aes(x = Location, y = SpringFlow))+
+#   geom_boxplot(fill = "lightblue")+
+#   labs(title = "Annual Spring Flow for Select Colorado River Basin Gages (1906-2020)", x = "Location", y = "Spring Flow (MAF)")+
+#   theme_minimal()+
+#   theme(panel.border = element_rect(color = "black", fill = NA, size = 1))
   
 
 ```
