@@ -16,7 +16,7 @@ library(ggplot2)
 library(tidyverse)
 library(tibble)
 library(randomForest)
-
+library(patchwork)
 
 ```
 
@@ -227,10 +227,13 @@ The selected gages are the Upper Colorado Reach Inflow (Colorado River @ Glenwoo
 ```{r}
 # Subset the annual spring flow dataset for just the selected gages
 selectgage <- c(1, 6, 9, 13, 19, 20)
+
+gagenames <- c("CR_Glen", "Gunn_Grand", "Green_FontRes", "LSR_Lily", "SJR_Bluff", "CR_LeesFerry")
+
 ngages <-length(selectgage)
 
 ann_spring_flow_sel <- ann_spring_flow[, selectgage]
-colnames(ann_spring_flow_sel) <- c("CR_Glen", "Gunn_Grand", "Green_FontRes", "LSR_Lily", "SJR_Bluff", "CR_LeesFerry")
+colnames(ann_spring_flow_sel) <- gagenames
 
 # Parse the spring flow years at the selected gages into their respective SOM nodes
 nodeflows <- list()
@@ -307,25 +310,58 @@ for (i in 1:ngages){
   gage_preds[[i]] <- flow_pcaresult$x[,i] * sum(sapply(RF_mods[1:4], function(mod) sum(mod$preds)))
 }
 
-names(gage_preds) <- c("CR_Glen", "Gunn_Grand", "Green_FontRes", "LSR_Lily", "SJR_Bluff", "CR_LeesFerry")
+names(gage_preds) <- gagenames
 
 ```
 
 #####*Evaluate the predictions*
 ```{r Model Evaluation}
 # Evaluate each model fit using Correlation and RMSE
-mod_evals <- list()
+# mod_evals <- list()
+
+actvals <- as.data.frame(ann_spring_flow_sel)
+predvals <- as.data.frame(matrix(numeric(0), nrow = nrow(actvals), ncol = ngages))
 
 for (i in 1:ngages){
-  mod_evals[[i]] <- modeval(ann_spring_flow_sel[,i], gage_preds[[i]])
+  predvals[,i] <- gage_preds[[i]]
 }
+# 
+# mod_eval <- modeval(actvals, predvals)
+# 
+#   evalplots <- mod_eval$corrplot + mod_eval$rmseplot +
+#     plot_annotation(title = paste("Correlation and RMSE of the RF Predictions for All Gages"))
+#   print(evalplots)
+
+# for (i in 1:ngages){
+#   mod_evals[[i]] <- modeval(ann_spring_flow_sel[,i], gage_preds[[i]])
+# }
 
 # Boxplot the Correlation and RMSE for each gage
-for (i in 1:ngages){
-  par(mfrow = c(1,2))
-  print(mod_evals[[i]]$corrplot)
-  print(mod_evals[[i]]$rmseplot)
+# for (i in 1:ngages){
+#   evalplots <- mod_evals[[i]]$corrplot + mod_evals[[i]]$rmseplot + 
+#     plot_annotation(title = paste("Correlation and RMSE of the RF Predictions for", gagenames[i]))
+#   print(evalplots)
+# }
+
+# Plot the predicted values against the actual values
+predvact_plots <- list()
+
+for (i in 1:ngages) {
+  # Create a data frame for ggplot
+  plot_data <- data.frame(Actual = actvals[, i], Predicted = predvals[, i])
+  
+  # Generate the plot object
+  predvact_plots[[i]] <- ggplot(plot_data, aes(x = Actual, y = Predicted)) +
+    geom_point() + 
+    geom_abline(slope = 1, intercept = 0, color = "red", linetype = "solid") +
+    labs(title = paste("Predicted v. Actual -", gagenames[i]), x = "Actual", y = "Predicted") +
+    theme(plot.title = element_text(size = 13, face = "bold", hjust = 0.5))
+  
+  # Print the plots
+  
 }
+
+
 
 
 ```

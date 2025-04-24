@@ -6,8 +6,9 @@ rmseskill = 1:length(actvals )
 for (i in 1:length(actvals)){
     mean = mean(actvals)
     sd = sd(actvals)
-    corrskill[i] = cor(actvals,predvals)
-    rmseskill[i] = sqrt(mean((actvals - predvals)^2))}
+    corrskill[i] = cor(actvals[i],predvals[i])
+    rmseskill[i] = sqrt(mean((actvals[i] - predvals[i])^2))
+}
 
 # Boxplot the Correlation and RMSE
 corrplot <- ggplot()+
