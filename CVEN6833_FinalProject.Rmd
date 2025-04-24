@@ -356,10 +356,13 @@ for (i in 1:ngages) {
     geom_abline(slope = 1, intercept = 0, color = "red", linetype = "solid") +
     labs(title = paste("Predicted v. Actual -", gagenames[i]), x = "Actual", y = "Predicted") +
     theme(plot.title = element_text(size = 13, face = "bold", hjust = 0.5))
-  
-  # Print the plots
-  
 }
+  # Print the plots
+  predvact_plot_print <- predvact_plots[[1]] + predvact_plots[[2]] + predvact_plots[[3]] + predvact_plots[[4]] + predvact_plots[[5]] + predvact_plots[[6]]
+
+  print(predvact_plot_print)
+  
+
 
 
 
