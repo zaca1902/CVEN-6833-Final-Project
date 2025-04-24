@@ -1,7 +1,7 @@
 RFMod4Flow <- function(flowpcs, sstpcs)
 {
   # Fit a Random Forest Model
-  rf_mod <- randomForest(flowpcs ~., data = sstpcs, ntree = 1000, mtry = 5,
+  rf_mod <- randomForest(x = sstpcs, y = flowpcs, ntree = 1000, mtry = ncol(sstpcs),
                                  importance = TRUE)
   
   # Predict off the Random Forest Model

@@ -287,10 +287,15 @@ flowpcs <- as.data.frame(flow_pcaresult$x[,1:4])
 
 ```
 
-#####*Fit a RF Model and predict for Streamflow*
+#####*Fit a Random Forest Model and predict for Streamflow*
 ```{r RF Model}
-# Fit and plot a CART Model for each gage based on the PCs
-Glen_RF <- RFMod4Flow(flowpcs, sstpcs)
+# Fit a Random Forest Model for each of the Flow PCs
+RF_mods <- list()
+
+for (i in 1: ncol(flowpcs)){
+  RF_mods[[i]] <- RFMod4Flow(flowpcs[,i], sstpcs)
+}
+
 
 ```
 
