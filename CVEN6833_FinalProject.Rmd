@@ -289,13 +289,12 @@ flowpcs <- as.data.frame(flow_pcaresult$x[,1:4])
 
 #####*Fit a Random Forest Model and predict for Streamflow*
 ```{r RF Model}
-# Fit a Random Forest Model for each of the Flow PCs
+# Fit a Random Forest Model for each of the Flow PCs and get predicted values
 RF_mods <- list()
 
 for (i in 1: ncol(flowpcs)){
   RF_mods[[i]] <- RFMod4Flow(flowpcs[,i], sstpcs)
 }
-
 
 ```
 
