@@ -287,7 +287,7 @@ flowpcs <- as.data.frame(flow_pcaresult$x[,1:4])
 
 ```
 
-#####*Fit a Random Forest Model and predict for Streamflow*
+#####*Fit a Random Forest Model and predict for Spring flow*
 ```{r RF Model}
 # Fit a Random Forest Model for each of the Flow PCs and get predicted values
 RF_mods <- list()
@@ -298,30 +298,35 @@ for (i in 1: ncol(flowpcs)){
 
 ```
 
-#####*Predict Streamflow at each gage using the CART Models*
-```{r Predict with CART}
-# Predict streamflow at each gage with fit CART models
-predvals_Glen <- predict(Glen_cart$mod, newdata = sstpcs)
+#####*Predict spring flow at each gage using the RF Models*
+```{r Predict with RF}
+# Predict stream flow at each gage with the RF models
+gage_preds <- list()
 
-predvals_Gunn <- predict(Gunn_cart$mod, newdata = sstpcs)
+for (i in 1:ngages){
+  gage_preds[[i]] <- flow_pcaresult$x[,i] * sum(sapply(RF_mods[1:4], function(mod) sum(mod$preds)))
+}
 
-predvals_Green <- predict(Green_cart$mod, newdata = sstpcs)
-
-predvals_LSR <- predict(LSR_cart$mod, newdata = sstpcs)
-
-predvals_SJR <- predict(SJR_cart$mod, newdata = sstpcs)
-
-predvals_LF <- predict(LF_cart$mod, newdata = sstpcs)
+names(gage_preds) <- c("CR_Glen", "Gunn_Grand", "Green_FontRes", "LSR_Lily", "SJR_Bluff", "CR_LeesFerry")
 
 ```
 
-#####*Evaluate the Fit of Each Model*
+#####*Evaluate the predictions*
 ```{r Model Evaluation}
-# Evaluate each model fit using Correlation and RMSE, then boxplot the results
-Glen_eval <- modeval(ann_spring_flow_sel$CR_Glen, predvals_Glen)
+# Evaluate each model fit using Correlation and RMSE
+mod_evals <- list()
 
-print(Glen_eval$corrplot)
-print(Glen_eval$rmseplot)
+for (i in 1:ngages){
+  mod_evals[[i]] <- modeval(ann_spring_flow_sel[,i], gage_preds[[i]])
+}
+
+# Boxplot the Correlation and RMSE for each gage
+for (i in 1:ngages){
+  par(mfrow = c(1,2))
+  print(mod_evals[[i]]$corrplot)
+  print(mod_evals[[i]]$rmseplot)
+}
+
 
 ```
 
