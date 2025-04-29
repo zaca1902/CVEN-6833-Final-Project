@@ -285,12 +285,12 @@ flow_pcaresult <- prcomp(ann_spring_flow_sel, scale. = TRUE)
 #      main = "Scree Plot (PVE)",
 #      pch = 19)
 
-# Extract the first 4 PCs
-flowpcs <- as.data.frame(flow_pcaresult$x[,1:4])
+# Extract the first 2 PCs
+flowpcs <- as.data.frame(flow_pcaresult$x[,1:2])
 
 ```
 
-#####*Fit a Random Forest Model and predict for Spring flow*
+#####*Fit a Random Forest Model and predict for Spring flow PCs*
 ```{r RF Model}
 # Fit a Random Forest Model for each of the Flow PCs and get predicted values
 RF_mods <- list()
@@ -299,49 +299,50 @@ for (i in 1: ncol(flowpcs)){
   RF_mods[[i]] <- RFMod4Flow(flowpcs[,i], sstpcs)
 }
 
+flow_PC1_pred <- RF_mods[[1]]$preds
+flow_PC2_pred <- RF_mods[[2]]$preds
+
+flow_PCs_pred <- cbind(flow_PC1_pred, flow_PC2_pred)
+
 ```
 
 #####*Predict spring flow at each gage using the RF Models*
 ```{r Predict with RF}
-# Predict stream flow at each gage with the RF models
-gage_preds <- list()
+# Predict stream flow PCs with the RF models and then determine the scaled and centered flow values at every gage
+flow_PCs_pred_ALL <- cbind(flow_PCs_pred, matrix(0, nrow(flow_PCs_pred), 4))
 
-for (i in 1:ngages){
-  gage_preds[[i]] <- flow_pcaresult$x[,i] * sum(sapply(RF_mods[1:4], function(mod) sum(mod$preds)))
-}
+pred_flows_scaled <- flow_PCs_pred_ALL %*% t(flow_pcaresult$rotation)
 
-names(gage_preds) <- gagenames
+# Unscale and uncenter the data to get the actual flow values for the gages
+pred_flows_unscale <- sweep(pred_flows_scaled, 2, flow_pcaresult$scale, "*")
+pred_flows <- sweep(pred_flows_unscale, 2, flow_pcaresult$center, "+")
 
 ```
 
 #####*Evaluate the predictions*
 ```{r Model Evaluation}
 # Evaluate each model fit using Correlation and RMSE
-# mod_evals <- list()
-
 actvals <- as.data.frame(ann_spring_flow_sel)
-predvals <- as.data.frame(matrix(numeric(0), nrow = nrow(actvals), ncol = ngages))
+predvals <- as.data.frame(pred_flows)
 
-for (i in 1:ngages){
-  predvals[,i] <- gage_preds[[i]]
-}
-# 
 # mod_eval <- modeval(actvals, predvals)
 # 
 #   evalplots <- mod_eval$corrplot + mod_eval$rmseplot +
 #     plot_annotation(title = paste("Correlation and RMSE of the RF Predictions for All Gages"))
 #   print(evalplots)
 
-# for (i in 1:ngages){
-#   mod_evals[[i]] <- modeval(ann_spring_flow_sel[,i], gage_preds[[i]])
-# }
+mod_evals <- list()
+
+for (i in 1:ngages){
+  mod_evals[[i]] <- modeval(actvals[,i], predvals[,i])
+}
 
 # Boxplot the Correlation and RMSE for each gage
-# for (i in 1:ngages){
-#   evalplots <- mod_evals[[i]]$corrplot + mod_evals[[i]]$rmseplot + 
-#     plot_annotation(title = paste("Correlation and RMSE of the RF Predictions for", gagenames[i]))
-#   print(evalplots)
-# }
+for (i in 1:ngages){
+  evalplots <- mod_evals[[i]]$corrplot + mod_evals[[i]]$rmseplot +
+    plot_annotation(title = paste("Correlation and RMSE of the RF Predictions for", gagenames[i]))
+  print(evalplots)
+}
 
 # Plot the predicted values against the actual values
 predvact_plots <- list()
@@ -357,8 +358,8 @@ for (i in 1:ngages) {
     labs(title = paste("Predicted v. Actual -", gagenames[i]), x = "Actual", y = "Predicted") +
     theme(plot.title = element_text(size = 13, face = "bold", hjust = 0.5))
 }
-  # Print the plots
-  predvact_plot_print <- predvact_plots[[1]] + predvact_plots[[2]] + predvact_plots[[3]] + predvact_plots[[4]] + predvact_plots[[5]] + predvact_plots[[6]]
+# Print the plots
+predvact_plot_print <- predvact_plots[[1]] + predvact_plots[[2]] + predvact_plots[[3]] + predvact_plots[[4]] + predvact_plots[[5]] + predvact_plots[[6]]
 
   print(predvact_plot_print)
   
