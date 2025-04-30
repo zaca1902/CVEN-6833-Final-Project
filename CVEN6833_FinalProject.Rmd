@@ -4,8 +4,8 @@
 
 This R Markdown file runs the main body of code for this final project analysis.
 
-#####*Get Libraries*
-```{r Get Libraries}
+##### *Get Libraries*
+```{r Get Libraries, warning = FALSE, message = FALSE}
 library(dplyr)
 library(lubridate)
 library(maps)
@@ -20,7 +20,7 @@ library(patchwork)
 
 ```
 
-#####*Source Functions*
+##### *Source Functions*
 Each of these function codes can be found at the end of this document as "commented out" lines of code. The source commands here pull from the same directory/repository as this Rmd file.
 ```{r Source Functions}
 source("RFMod4FLow.R")
@@ -28,8 +28,8 @@ source("modeval.R")
 
 ```
 
-#####*Read and Format Flow Data*
-```{r Read Flow Data}
+##### *Read and Format Flow Data*
+```{r Read Flow Data, warning=FALSE}
 flowdata_raw <- as.data.frame(read.csv("NatFlowDataCRB_1906_to_2020.csv", header = TRUE, skip = 3))
 flowdata_raw <- flowdata_raw[1:(nrow(flowdata_raw)-5),]   # Remove summary rows
 
@@ -64,9 +64,9 @@ ann_spring_flow <- as.data.frame(ann_spring_flow)
 
 ```
 
-#####*Cmds-4Zach.R*
+##### *Cmds-4Zach.R*
 This code chunk was directly provided/written by Professor R. Balaji.
-```{r Cmds-4Zach.R}
+```{r Cmds-4Zach.R, warning=FALSE}
 nrows=72
 ncols=20
 ntime = 115    #Dec-Feb 1906 - Dec-Feb 2020
@@ -134,8 +134,8 @@ write(t(xygrid1),file="kaplan-sst-locs-4Zach.txt",ncol=2)
 
 ```
 
-#####*SOM on Winter SST*
-```{r SOM on Winter SST}
+##### *SOM on Winter SST*
+```{r SOM on Winter SST, warning=FALSE}
 # Establish the SOM Parameters
 n = 3
 
@@ -196,39 +196,15 @@ mtext("Annual Average Winter SST - SOM Maps 3x3", outer = TRUE, side = 3, cex = 
 obs_nodes <- SOM$unit.classif
 node_idx <- split(1:nrow(sstannavg), obs_nodes)
 
-
-# subplots <- 4
-# totalplots <- nnodes
-# numplots <- ceiling(totalplots/subplots)
-# 
-# for(ploti in 1:numplots){
-# par(oma = c(0,0,2.5,1))
-# par(mfrow = c((subplots/2), (subplots/2)))
-# par(mar = c(2, 3, 2, 1))
-# 
-# start <- (ploti-1)*subplots+1
-# end <- min(ploti*subplots, totalplots)
-# 
-# for(k in start:end){
-#   zfull = rep(NaN,nglobe)
-#   zfull[indexgrid] = nodes[,k]
-#   zmat = matrix(zfull, nrow = nrows, ncol = ncols)
-#   image.plot(lon, lat, zmat, ylim = range(-60, 90), main = paste("Node ", k, sep = ""))
-#   contour(lon, lat, (zmat), ylim = range(-60, 90), add = TRUE, nlev = 6, lwd = 1)
-#   maps::map("world2",add=T)}
-# 
-#   mtext(paste("Annual Average Winter SST - SOM Maps 4x4 (", ploti, " of ", numplots, ")", sep = ""),
-#         outer = TRUE, side = 3, cex = 1.2, line = 1)}
-
 ```
 
 ##### *Select Gages and Boxplot the Flows for Each SOM Node*
 The selected gages are the Upper Colorado Reach Inflow (Colorado River @ Glenwood Springs, CO), Gunnison River @ Grand Junction, CO, Green River Below Fontenelle Reservoir, WY, Little Snake River near Lily, CO, San Juan River near Bluff, UT, and Colorado River @ Lees Ferry, AZ.    
-```{r}
+```{r Select Gage and Boxplot, warning=FALSE}
 # Subset the annual spring flow dataset for just the selected gages
 selectgage <- c(1, 6, 9, 13, 19, 20)
 
-gagenames <- c("CR_Glen", "Gunn_Grand", "Green_FontRes", "LSR_Lily", "SJR_Bluff", "CR_LeesFerry")
+gagenames <- c("CR-Glenwood", "Gunnison", "Green", "Little Snake River", "San Juan River", "CR-LeesFerry")
 
 ngages <-length(selectgage)
 
@@ -245,25 +221,25 @@ for (nodenum in 1:nnodes){
   }
 
 # Boxplot the associated annual gage flows for each SOM node
-par(mfrow = c(3,3))
+par(mfrow = c(3,3), oma = c(0, 0, 3, 0))
 for (nodenum in 1:nnodes){
   boxplot(as.matrix(nodeflows[[nodenum]][, 1:ngages]), ylim = c(-0.5,2), col = "lightblue", 
-          ylab = "Spring Flow (MAF)", main = paste("Node", nodenum))
+          ylab = "Flow (MAF)", main = paste("Node", nodenum), names = FALSE, cex.lab = 0.9, cex.main = 0.9)
   grid(nx = NA, ny = NULL)
 }
-mtext("Spring Flow for Each Gage at the 3x3 SOM Nodes", outer = TRUE, side = 3, cex = 1.2, line = 1)
+mtext("Spring Flow for Each Gage at the 3x3 SOM Nodes", outer = TRUE, side = 3, cex = 0.9, line = 1)
 
-par(mfrow = c(1,1))
+par(mfrow = c(1,1), oma = c(3, 0, 0, 0))
 for (nodenum in 1:nnodes){
   boxplot(as.matrix(nodeflows[[nodenum]][, 1:ngages]), ylim = c(-0.5,2), col = "lightblue", 
-          ylab = "Spring Flow (MAF)", main = paste("Node", nodenum))
+          ylab = "Spring Flow (MAF)", main = paste("Node", nodenum), names = gagenames, las = 2, cex.axis = 0.7)
   grid(nx = NA, ny = NULL)
 }
 
 ```
 
-#####*PCA on SSTs*
-```{r PCA on SSTs}
+##### *PCA on SSTs*
+```{r PCA on SSTs, warning=FALSE}
 # Perform the PCA
 sst_pcaresult <- prcomp(sstannavg, scale. = TRUE)
 
@@ -272,26 +248,18 @@ sstpcs <- as.data.frame(sst_pcaresult$x[,1:4])
 
 ```
 
-#####*PCA on Spring Flows*
-```{r PCA on Flows}
+##### *PCA on Spring Flows*
+```{r PCA on Flows, warning=FALSE}
 # Perform the PCA
 flow_pcaresult <- prcomp(ann_spring_flow_sel, scale. = TRUE)
-
-# # Calculate proportion of variance explained and plot it
-# pve <- (flow_pcaresult$sdev)^2 / sum(flow_pcaresult$sdev^2)
-# 
-# plot(pve, type = "b", xlab = "Principal Component", 
-#      ylab = "Proportion of Variance Explained",
-#      main = "Scree Plot (PVE)",
-#      pch = 19)
 
 # Extract the first 2 PCs
 flowpcs <- as.data.frame(flow_pcaresult$x[,1:2])
 
 ```
 
-#####*Fit a Random Forest Model and predict for Spring flow PCs*
-```{r RF Model}
+##### *Fit a Random Forest Model and predict for Spring flow PCs*
+```{r RF Model, warning=FALSE}
 # Fit a Random Forest Model for each of the Flow PCs and get predicted values
 RF_mods <- list()
 
@@ -306,8 +274,8 @@ flow_PCs_pred <- cbind(flow_PC1_pred, flow_PC2_pred)
 
 ```
 
-#####*Predict spring flow at each gage using the RF Models*
-```{r Predict with RF}
+##### *Predict spring flow at each gage using the RF Models*
+```{r Predict with RF, warning=FALSE}
 # Predict stream flow PCs with the RF models and then determine the scaled and centered flow values at every gage
 flow_PCs_pred_ALL <- cbind(flow_PCs_pred, matrix(0, nrow(flow_PCs_pred), 4))
 
@@ -319,30 +287,17 @@ pred_flows <- sweep(pred_flows_unscale, 2, flow_pcaresult$center, "+")
 
 ```
 
-#####*Evaluate the predictions*
-```{r Model Evaluation}
+##### *Evaluate the predictions*
+```{r Model Evaluation, warning=FALSE}
 # Evaluate each model fit using Correlation and RMSE
 actvals <- as.data.frame(ann_spring_flow_sel)
 predvals <- as.data.frame(pred_flows)
 
-# mod_eval <- modeval(actvals, predvals)
-# 
-#   evalplots <- mod_eval$corrplot + mod_eval$rmseplot +
-#     plot_annotation(title = paste("Correlation and RMSE of the RF Predictions for All Gages"))
-#   print(evalplots)
+mod_eval <- modeval(actvals, predvals)
 
-mod_evals <- list()
-
-for (i in 1:ngages){
-  mod_evals[[i]] <- modeval(actvals[,i], predvals[,i])
-}
-
-# Boxplot the Correlation and RMSE for each gage
-for (i in 1:ngages){
-  evalplots <- mod_evals[[i]]$corrplot + mod_evals[[i]]$rmseplot +
-    plot_annotation(title = paste("Correlation and RMSE of the RF Predictions for", gagenames[i]))
-  print(evalplots)
-}
+evalplots <- mod_eval$corrplot + mod_eval$rmseplot +
+  plot_annotation(title = paste("Correlation and RMSE of the RF Predictions for All Gages"))
+print(evalplots)
 
 # Plot the predicted values against the actual values
 predvact_plots <- list()
@@ -355,28 +310,64 @@ for (i in 1:ngages) {
   predvact_plots[[i]] <- ggplot(plot_data, aes(x = Actual, y = Predicted)) +
     geom_point() + 
     geom_abline(slope = 1, intercept = 0, color = "red", linetype = "solid") +
-    labs(title = paste("Predicted v. Actual -", gagenames[i]), x = "Actual", y = "Predicted") +
+    labs(title = gagenames[i], x = "Actual", y = "Predicted") +
     theme(plot.title = element_text(size = 13, face = "bold", hjust = 0.5))
 }
 # Print the plots
-predvact_plot_print <- predvact_plots[[1]] + predvact_plots[[2]] + predvact_plots[[3]] + predvact_plots[[4]] + predvact_plots[[5]] + predvact_plots[[6]]
+predvact_plot_print <- predvact_plots[[1]] + predvact_plots[[2]] + predvact_plots[[3]] + predvact_plots[[4]] + predvact_plots[[5]] + predvact_plots[[6]] + 
+  plot_annotation(title = "Predicted vs. Actual Spring Flow (MAF) at Each Gage",
+  theme = theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold")))
 
-  print(predvact_plot_print)
-  
-
-
-
+print(predvact_plot_print)
 
 
 ```
 
-#####*Commented Out Functions*
-```{r Functions}
+##### *Commented Out Functions*
+```{r Functions, warning=FALSE}
 ### RFMod4FLow.R
-
+# RFMod4Flow <- function(flowpcs, sstpcs)
+# {
+#   # Fit a Random Forest Model
+#   rf_mod <- randomForest(x = sstpcs, y = flowpcs, ntree = 1000, mtry = ncol(sstpcs),
+#                                  importance = TRUE)
+#   
+#   # Predict off the Random Forest Model
+#   pred_vals <- predict(rf_mod, newdata = sstpcs)
+#   
+#   return(list(mod = rf_mod, preds = pred_vals))
+# }
 
 
 ### modeval.R
+# modeval <- function(actvals, predvals){
+# # Calculate Correlation and RMSE
+# n <- ncol(actvals)
+# corrskill <- numeric(n)
+# rmseskill <- numeric(n)
+# 
+# for (i in 1:n){
+#   corrskill[i] <- cor(actvals[,i], predvals[,i])
+#   rmseskill[i] <- sqrt(mean((actvals[,i] - predvals[,i])^2))
+# }
+# 
+# # Create data frames for plotting
+# corr_df <- data.frame(metric = "Correlation", value = corrskill)
+# rmse_df <- data.frame(metric = "RMSE", value = rmseskill)
+#   
+# # Boxplot the Correlation and RMSE
+# corrplot <- ggplot(corr_df, aes(x = metric, y = value)) +
+#   geom_boxplot() +
+#   labs(title = "Corr.", x = "", y = "")+
+#   theme(plot.title = element_text(size = 13, face = "bold", hjust = 0.5))
+# 
+# rmseplot <- ggplot(rmse_df, aes(x = metric, y = value)) +
+#   geom_boxplot() +
+#   labs(title = "RMSE", x = "", y = "")+
+#   theme(plot.title = element_text(size = 13, face = "bold", hjust = 0.5))
+# 
+# return(list(corrplot = corrplot, rmseplot = rmseplot))
+# }
 
 ```
 
