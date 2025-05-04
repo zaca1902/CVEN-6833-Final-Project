@@ -232,7 +232,7 @@ mtext("Spring Flow for Each Gage at the 3x3 SOM Nodes", outer = TRUE, side = 3, 
 par(mfrow = c(1,1), oma = c(3, 0, 0, 0))
 for (nodenum in 1:nnodes){
   boxplot(as.matrix(nodeflows[[nodenum]][, 1:ngages]), ylim = c(-0.5,2), col = "lightblue", 
-          ylab = "Spring Flow (MAF)", main = paste("Node", nodenum), names = gagenames, las = 2, cex.axis = 0.7)
+          ylab = "Intervening Spring Flow (MAF)", main = paste("Node", nodenum), names = gagenames, las = 2, cex.axis = 0.7)
   grid(nx = NA, ny = NULL)
 }
 
